@@ -4,5 +4,9 @@ Reference copy of the manifest for the [`last30days-skill`](https://github.com/m
 Claude Code plugin (by Matt Van Horn), which this repo's SessionStart hook
 (`.claude/hooks/session-start.sh`) resolves from the local plugin cache.
 
-`plugin.json` in this directory is the upstream plugin manifest, kept here
-for reference alongside the cache-layout-resolution logic.
+- `plugin.json` — the upstream plugin manifest
+- `marketplace.json` — the upstream `.claude-plugin/marketplace.json`, the
+  marketplace listing that makes the plugin installable via
+  `/plugin marketplace add mvanhorn/last30days-skill`
+
+Both are kept here for reference alongside the cache-layout-resolution logic.
