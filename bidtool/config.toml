@@ -2,10 +2,20 @@
 # Read by bidtool/sam_discover.py and by the gov-bid-generator skill.
 
 [search]
-# YOUR NAICS codes (from the "Southern IT Solutions" Claude Project). The tool
-# refuses to run while this list is empty.
-# Example shape: naics = ["541512", "541519", "518210"]
-naics = []
+# Southern IT Solutions NAICS codes (541519 is primary). The tool refuses to
+# run while this list is empty. One SAM.gov request is used per code per run.
+naics = [
+  "541519",  # Other Computer Related Services (primary)
+  "541512",  # Computer Systems Design Services
+  "541330",  # Engineering Services
+  "517410",  # Satellite Telecommunications
+  "611420",  # Computer Training
+  "611430",  # Professional & Management Development Training
+  "423430",  # Computer & Peripheral Equipment Merchant Wholesalers
+  "511210",  # Software Publishers
+  "333316",  # Photographic & Photocopying Equipment Manufacturing
+  "238210",  # Electrical Contractors (low-voltage / structured cabling)
+]
 
 # SAM.gov notice types: o=Solicitation, k=Combined Synopsis/Solicitation,
 # r=Sources Sought, p=Presolicitation
