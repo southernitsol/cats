@@ -153,26 +153,56 @@ def evaluate(opp, cfg, now):
             "deadline": deadline.isoformat() if deadline else None}
 
 
-def cmd_discover(_args):
+def codes_per_run(search):
+    """NAICS codes searched per run = daily budget minus the fetch reserve."""
+    room = search["daily_request_budget"] - search.get("fetch_reserve", 0)
+    if room < 1:
+        raise SamError("fetch_reserve leaves no requests for searching; lower it "
+                       "or raise daily_request_budget")
+    return min(room, len(search["naics"]))
+
+
+def pick_codes(naics, cursor, per_run):
+    """Next per_run codes in a repeating rotation. Returns (codes, cursor)."""
+    start = cursor % len(naics)
+    return [naics[(start + i) % len(naics)] for i in range(per_run)], start
+
+
+def cmd_discover(args):
     cfg, key = load_config(), api_key()
     state = load_state()
-    budget = Budget(state, cfg["search"]["daily_request_budget"])
+    search = cfg["search"]
+    budget = Budget(state, search["daily_request_budget"])
     today = date.today()
-    frm = (today - timedelta(days=cfg["search"]["lookback_days"])).strftime("%m/%d/%Y")
+    if state.get("last_discover") == today.isoformat() and not args.force:
+        print("discover already ran today; running again would skip codes in the "
+              "rotation. Use --force to override.", file=sys.stderr)
+        return 1
+    per_run = codes_per_run(search)
+    codes, cursor = pick_codes(search["naics"], state.get("naics_cursor", 0), per_run)
+    # A code is revisited every cycle_days days, so the window must cover that gap.
+    cycle_days = -(-len(search["naics"]) // per_run)
+    lookback = max(search["lookback_days"], cycle_days + 1)
+    frm = (today - timedelta(days=lookback)).strftime("%m/%d/%Y")
     to = today.strftime("%m/%d/%Y")
     now = datetime.now(timezone.utc)
     found = {}
+    done = 0
     try:
-        for ncode in cfg["search"]["naics"]:
+        for ncode in codes:
             for opp in search_ncode(key, ncode, frm, to, budget):
                 info = evaluate(opp, cfg, now)
                 if info and opp.get("noticeId"):
                     found[opp["noticeId"]] = {**opp, "_eval": info}
+            done += 1  # only codes that completed advance the rotation
     except SamError as e:
         print(f"stopped early: {e}", file=sys.stderr)
-        if not found:
-            save_state(state)
-            return 1
+    if done:
+        state["naics_cursor"] = (cursor + done) % len(search["naics"])
+        state["last_discover"] = today.isoformat()
+    if not found and done < len(codes):
+        save_state(state)
+        return 1
     items = sorted(found.values(), key=lambda o: o["_eval"]["deadline"] or "9999")
     for o in items:
         o["_eval"]["new"] = o["noticeId"] not in state["seen"]
@@ -182,6 +212,9 @@ def cmd_discover(_args):
     stamp = today.isoformat()
     (out / f"shortlist-{stamp}.json").write_text(json.dumps(items, indent=2))
     lines = [f"# SAM.gov shortlist {stamp}", "",
+             f"NAICS searched this run ({done}/{len(codes)}): "
+             f"{', '.join(codes[:done])}; window {lookback} days; "
+             f"full rotation every {cycle_days} day(s).", "",
              "| New | Due | Type | Set-aside | Solicitation # | Title | Agency | Flags |",
              "|---|---|---|---|---|---|---|---|"]
     for o in items:
@@ -288,7 +321,10 @@ def cmd_fetch(args):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("discover").set_defaults(fn=cmd_discover)
+    d = sub.add_parser("discover")
+    d.add_argument("--force", action="store_true",
+                   help="run again today even though discover already ran")
+    d.set_defaults(fn=cmd_discover)
     f = sub.add_parser("fetch")
     f.add_argument("notice_id")
     f.set_defaults(fn=cmd_fetch)

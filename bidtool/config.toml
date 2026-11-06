@@ -39,6 +39,12 @@ lookback_days = 7
 # stops at this number. One request is used per NAICS code per run.
 daily_request_budget = 10
 
+# Requests kept free each day for `fetch` (descriptions + attachments). The
+# remaining budget searches NAICS codes in rotation: with 10 codes, a budget of 10
+# and a reserve of 5, each run searches 5 codes, so every code is searched every
+# 2 days. lookback_days is widened automatically to cover the rotation gap.
+fetch_reserve = 5
+
 # Bonus signal for the bid/no-bid score (does not filter anything out).
 prefer_states = ["MS", "AL", "LA", "FL", "TX"]
 

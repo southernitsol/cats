@@ -118,9 +118,82 @@ class DiscoverEndToEnd(unittest.TestCase):
             self.assertEqual([i["noticeId"] for i in items], ["a"])
             self.assertTrue(items[0]["_eval"]["new"])
             self.assertNotIn("api_key", (tmp / "out" / "state.json").read_text())
-            sd.main(["discover"])
+            self.assertEqual(sd.main(["discover"]), 1)  # same-day guard
+            sd.main(["discover", "--force"])
             items2 = json.loads(sorted((tmp / "out").glob("shortlist-*.json"))[0].read_text())
             self.assertFalse(items2[0]["_eval"]["new"])
+
+
+class RotationTests(unittest.TestCase):
+    CODES = ["a", "b", "c", "d", "e"]
+
+    def test_pick_codes_wraps(self):
+        self.assertEqual(sd.pick_codes(self.CODES, 0, 2), (["a", "b"], 0))
+        self.assertEqual(sd.pick_codes(self.CODES, 4, 2), (["e", "a"], 4))
+        self.assertEqual(sd.pick_codes(self.CODES, 7, 2), (["c", "d"], 2))
+
+    def test_codes_per_run_reserves_fetch_requests(self):
+        s = {"naics": self.CODES * 2, "daily_request_budget": 10, "fetch_reserve": 5}
+        self.assertEqual(sd.codes_per_run(s), 5)
+        s["fetch_reserve"] = 0
+        self.assertEqual(sd.codes_per_run(s), 10)
+        s["naics"] = ["a"]
+        self.assertEqual(sd.codes_per_run(s), 1)  # never more than the code list
+        s.update(naics=self.CODES, fetch_reserve=10)
+        with self.assertRaises(sd.SamError):
+            sd.codes_per_run(s)
+
+    def _run(self, tmp, args, fail_on=None):
+        urls = []
+        sp = tmp / "out" / "state.json"
+        if sp.exists():  # simulate a new day: the request budget resets
+            st = json.loads(sp.read_text())
+            st.pop("requests", None)
+            sp.write_text(json.dumps(st))
+
+        def fake(url, key, timeout=60):
+            code = url.split("ncode=")[1].split("&")[0]
+            urls.append(code)
+            if code == fail_on:
+                raise sd.SamError("boom")
+            r = mock.MagicMock()
+            r.__enter__.return_value = io.BytesIO(
+                json.dumps({"totalRecords": 0, "opportunitiesData": []}).encode())
+            return r
+
+        with mock.patch.object(sd, "BASE", tmp), \
+             mock.patch.dict("os.environ", {"SAM_API_KEY": "k"}), \
+             mock.patch.object(sd, "http_get", side_effect=fake):
+            code = sd.main(args)
+        return code, urls, json.loads((tmp / "out" / "state.json").read_text())
+
+    def _tmp(self):
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / "config.toml").write_text(
+            '[search]\nnaics=["a","b","c","d","e"]\nnotice_types=["o"]\n'
+            'set_asides=["VSA"]\nunspecified_setaside_ok_for=[]\nlookback_days=1\n'
+            'daily_request_budget=4\nfetch_reserve=2\nprefer_states=[]\n')
+        return tmp
+
+    def test_rotation_across_runs_and_lookback_widening(self):
+        tmp = self._tmp()
+        _, urls, st = self._run(tmp, ["discover", "--force"])
+        self.assertEqual(urls, ["a", "b"])
+        self.assertEqual(st["naics_cursor"], 2)
+        _, urls, st = self._run(tmp, ["discover", "--force"])
+        self.assertEqual(urls, ["c", "d"])
+        _, urls, st = self._run(tmp, ["discover", "--force"])
+        self.assertEqual(urls, ["e", "a"])  # wraps; every code reached
+        md = sorted((tmp / "out").glob("shortlist-*.md"))[0].read_text()
+        self.assertIn("full rotation every 3 day(s)", md)
+        self.assertIn("window 4 days", md)  # max(1, 3 + 1)
+
+    def test_failed_code_does_not_advance_rotation(self):
+        tmp = self._tmp()
+        code, urls, st = self._run(tmp, ["discover", "--force"], fail_on="b")
+        self.assertEqual(urls, ["a", "b"])
+        self.assertEqual(st["naics_cursor"], 1)  # only "a" completed; "b" retried next run
+        self.assertEqual(code, 1)
 
 
 if __name__ == "__main__":
