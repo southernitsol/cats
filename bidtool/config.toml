@@ -50,8 +50,8 @@ prefer_states = ["MS", "AL", "LA", "FL", "TX"]
 
 [company]
 legal_name = "Southern IT Solutions"
-uei = "TODO"
-cage = "TODO"
+uei = "TNGAGFNSPL28"
+cage = "9MNZ3"
 # ONLY list a status here if it is currently verified/registered
 # (SDVOSB/VOSB via SBA VetCert, shown in SAM.gov). The skill will not
 # prepare a bid for a set-aside that is not covered by this list.
