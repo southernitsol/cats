@@ -1,0 +1,5 @@
+# Solicitation documents may be CUI / FOUO and quotes contain pricing: never commit them.
+bidtool/out/
+bidtool/bids/
+.env
+__pycache__/

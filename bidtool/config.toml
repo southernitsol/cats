@@ -1,0 +1,80 @@
+# Southern IT Solutions - bid discovery + generation config.
+# Read by bidtool/sam_discover.py and by the gov-bid-generator skill.
+
+[search]
+# Southern IT Solutions NAICS codes (541519 is primary). The tool refuses to
+# run while this list is empty. One SAM.gov request is used per code per run.
+naics = [
+  "541519",  # Other Computer Related Services (primary)
+  "541512",  # Computer Systems Design Services
+  "541330",  # Engineering Services
+  "517410",  # Satellite Telecommunications
+  "611420",  # Computer Training
+  "611430",  # Professional & Management Development Training
+  "423430",  # Computer & Peripheral Equipment Merchant Wholesalers
+  "511210",  # Software Publishers
+  "333316",  # Photographic & Photocopying Equipment Manufacturing
+  "238210",  # Electrical Contractors (low-voltage / structured cabling)
+]
+
+# SAM.gov notice types: o=Solicitation, k=Combined Synopsis/Solicitation,
+# r=Sources Sought, p=Presolicitation
+notice_types = ["o", "k", "r", "p"]
+
+# SAM.gov set-aside codes to accept:
+#   SDVOSBC = SDVOSB set-aside     SDVOSBS = SDVOSB sole source
+#   VSA     = VOSB set-aside       VSS     = VOSB sole source
+set_asides = ["SDVOSBC", "SDVOSBS", "VSA", "VSS"]
+
+# Sources sought / presolicitations often have no set-aside stated yet.
+# Notice types listed here are kept even when the set-aside field is blank
+# (they are flagged "set-aside not stated"). Use [] to require a match always.
+unspecified_setaside_ok_for = ["r", "p"]
+
+# How far back to search on each run (SAM.gov allows at most 1 year).
+lookback_days = 7
+
+# SAM.gov personal API keys have a small daily request quota (as low as 10/day
+# for keys without a role - check yours). The tool counts its own requests and
+# stops at this number. One request is used per NAICS code per run.
+daily_request_budget = 10
+
+# Requests kept free each day for `fetch` (descriptions + attachments). The
+# remaining budget searches NAICS codes in rotation: with 10 codes, a budget of 10
+# and a reserve of 5, each run searches 5 codes, so every code is searched every
+# 2 days. lookback_days is widened automatically to cover the rotation gap.
+fetch_reserve = 5
+
+# Bonus signal for the bid/no-bid score (does not filter anything out).
+prefer_states = ["MS", "AL", "LA", "FL", "TX"]
+
+[company]
+legal_name = "Southern IT Solutions"
+uei = "TNGAGFNSPL28"
+cage = "9MNZ3"
+# ONLY list a status here if it is currently verified/registered
+# (SDVOSB/VOSB via SBA VetCert, shown in SAM.gov). The skill will not
+# prepare a bid for a set-aside that is not covered by this list.
+# Allowed values: "SDVOSB", "VOSB", "SB" (small business)
+certifications = ["SDVOSB", "VOSB"]   # SBA VetCert Supplement: certified VOSB + SDVOSB
+# Date on the SBA VetCert approval letter (YYYY-MM-DD). Certification must be
+# renewed every 3 years; the skill stops if this is blank or 3 years have passed.
+sba_vetcert_date = ""   # TODO-OWNER: not shown on the supplement page
+# State-level only (not a federal set-aside status, so NOT in `certifications`).
+# Use for Mississippi state/local bids and the MMBR registry.
+state_certifications = ["Mississippi Minority Business Certification (MDA), approved 2026-07-22"]
+signer_name = "TODO"
+signer_title = "TODO"
+contact_email = "TODO"
+contact_phone = "TODO"
+
+[pricing]
+default_margin_pct = 0      # 0 = unset: the skill must ask before pricing
+quote_valid_days = 30
+# Fully burdened hourly rates. 0 = unset: the skill must not invent a rate.
+[pricing.labor_rates]
+"Solutions Architect" = 0
+"Systems Engineer" = 0
+"Cybersecurity Analyst" = 0
+"Help Desk / Technician" = 0
+"Project Manager" = 0
