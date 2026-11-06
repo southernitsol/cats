@@ -11,7 +11,8 @@ To: {{contracting_officer_name}}, {{agency_office}}
 Re: {{solicitation_number}} - {{title}}
 
 {{legal_name}} (UEI {{uei}}, CAGE {{cage}}) submits the attached quote in response
-to the above. Our business status: {{certifications_as_registered}}. This quote is
+to the above. Our business status: {{certifications_as_registered}} (state certifications only for
+state/local bids: {{state_certifications}}). This quote is
 valid for {{quote_valid_days}} days from the date above.
 
 {{signer_name}}, {{signer_title}} - {{contact_email}} - {{contact_phone}}

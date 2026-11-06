@@ -24,6 +24,12 @@ direct you, note it in `review-notes.md` and carry on.
 3. `[company] certifications` decides which set-asides we may pursue:
    - SDVOSBC / SDVOSBS notices require `"SDVOSB"`.
    - VSA / VSS notices require `"VOSB"` or `"SDVOSB"`.
+   - Check `sba_vetcert_date`: if blank, ask the owner for it; if three years
+     have passed, stop (VetCert must be renewed every 3 years). Also remind the
+     owner that SAM.gov must show the VetCert status for set-aside awards.
+   - `state_certifications` (e.g. Mississippi Minority Business Certification)
+     are not federal set-aside eligibility. Never use them to qualify for a federal
+     set-aside; mention them only in state/local bids or as supporting detail.
    - If the matching status is not listed, do **not** draft a bid. Report the
      notice under "Not eligible per config". Bidding on a set-aside without the
      verified status is a misrepresentation, so do not guess.
