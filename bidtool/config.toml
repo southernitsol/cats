@@ -1,0 +1,58 @@
+# Southern IT Solutions - bid discovery + generation config.
+# Read by bidtool/sam_discover.py and by the gov-bid-generator skill.
+
+[search]
+# YOUR NAICS codes (from the "Southern IT Solutions" Claude Project). The tool
+# refuses to run while this list is empty.
+# Example shape: naics = ["541512", "541519", "518210"]
+naics = []
+
+# SAM.gov notice types: o=Solicitation, k=Combined Synopsis/Solicitation,
+# r=Sources Sought, p=Presolicitation
+notice_types = ["o", "k", "r", "p"]
+
+# SAM.gov set-aside codes to accept:
+#   SDVOSBC = SDVOSB set-aside     SDVOSBS = SDVOSB sole source
+#   VSA     = VOSB set-aside       VSS     = VOSB sole source
+set_asides = ["SDVOSBC", "SDVOSBS", "VSA", "VSS"]
+
+# Sources sought / presolicitations often have no set-aside stated yet.
+# Notice types listed here are kept even when the set-aside field is blank
+# (they are flagged "set-aside not stated"). Use [] to require a match always.
+unspecified_setaside_ok_for = ["r", "p"]
+
+# How far back to search on each run (SAM.gov allows at most 1 year).
+lookback_days = 7
+
+# SAM.gov personal API keys have a small daily request quota (as low as 10/day
+# for keys without a role - check yours). The tool counts its own requests and
+# stops at this number. One request is used per NAICS code per run.
+daily_request_budget = 10
+
+# Bonus signal for the bid/no-bid score (does not filter anything out).
+prefer_states = ["MS", "AL", "LA", "FL", "TX"]
+
+[company]
+legal_name = "Southern IT Solutions"
+uei = "TODO"
+cage = "TODO"
+# ONLY list a status here if it is currently verified/registered
+# (SDVOSB/VOSB via SBA VetCert, shown in SAM.gov). The skill will not
+# prepare a bid for a set-aside that is not covered by this list.
+# Allowed values: "SDVOSB", "VOSB", "SB" (small business)
+certifications = []
+signer_name = "TODO"
+signer_title = "TODO"
+contact_email = "TODO"
+contact_phone = "TODO"
+
+[pricing]
+default_margin_pct = 0      # 0 = unset: the skill must ask before pricing
+quote_valid_days = 30
+# Fully burdened hourly rates. 0 = unset: the skill must not invent a rate.
+[pricing.labor_rates]
+"Solutions Architect" = 0
+"Systems Engineer" = 0
+"Cybersecurity Analyst" = 0
+"Help Desk / Technician" = 0
+"Project Manager" = 0
