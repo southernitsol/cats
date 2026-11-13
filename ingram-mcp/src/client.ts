@@ -36,7 +36,8 @@ export class IngramClient {
       }),
     });
     if (!res.ok) {
-      throw new IngramError(`Token request failed (${res.status}). Check credentials and that the app is approved.`, res.status, "n/a");
+      const detail = (await res.text()).slice(0, 300);
+      throw new IngramError(`Token request failed (${res.status}): ${detail}. Check credentials and that the app is approved.`, res.status, "n/a");
     }
     const json = (await res.json()) as { access_token: string; expires_in?: string | number };
     const ttl = Number(json.expires_in ?? 3600);
