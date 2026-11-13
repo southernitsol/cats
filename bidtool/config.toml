@@ -59,7 +59,7 @@ cage = "9MNZ3"
 certifications = ["SDVOSB", "VOSB"]   # SBA VetCert Supplement: certified VOSB + SDVOSB
 # Date on the SBA VetCert approval letter (YYYY-MM-DD). Certification must be
 # renewed every 3 years; the skill stops if this is blank or 3 years have passed.
-sba_vetcert_date = ""   # TODO-OWNER: not shown on the supplement page
+sba_vetcert_date = "2026-06-16"   # renew by 2029-06-16 (SBA sends notices 90 days prior)
 # State-level only (not a federal set-aside status, so NOT in `certifications`).
 # Use for Mississippi state/local bids and the MMBR registry.
 state_certifications = ["Mississippi Minority Business Certification (MDA), approved 2026-07-22"]
