@@ -63,10 +63,11 @@ sba_vetcert_date = "2026-06-16"   # renew by 2029-06-16 (SBA sends notices 90 da
 # State-level only (not a federal set-aside status, so NOT in `certifications`).
 # Use for Mississippi state/local bids and the MMBR registry.
 state_certifications = ["Mississippi Minority Business Certification (MDA), approved 2026-07-22"]
-signer_name = "TODO"
-signer_title = "TODO"
-contact_email = "TODO"
-contact_phone = "TODO"
+signer_name = "Joel Fields"
+signer_title = "CEO"
+contact_email = "jfields@fields-technology.com"
+contact_phone = "228-324-7787"
+website = "www.fields-technology.com"
 
 [pricing]
 default_margin_pct = 0      # 0 = unset: the skill must ask before pricing
