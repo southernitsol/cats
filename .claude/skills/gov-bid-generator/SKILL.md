@@ -99,8 +99,15 @@ docx/xlsx skills, and keep the markdown source alongside.
   SKU/part number, unit cost, quantity, date checked, stock status.
 - Never invent or "estimate" a price. If no source gives one, write
   `PRICE NEEDED` in that line and list it in the review notes.
-- Labor: use `[pricing.labor_rates]` from config. A rate of 0 means unset: stop and
-  ask. Margin comes from `default_margin_pct`; 0 means unset: ask.
+- Labor: use `[pricing.labor_rates]` from config. Use the standard rate for normal
+  business hours (`business_hours`) and the after-hours rate for nights, weekends,
+  and federal holidays; split hours between the two when work spans both. A rate
+  of 0 means unset: stop and ask. If the solicitation requires labor categories or
+  wage determination (SCA) rates higher than our rate, flag it in the review notes.
+- Margin: `default_margin_pct` on hardware/software per `margin_method`
+  (`margin_on_price`: sell = cost / (1 - margin)). Do not add margin on top of labor
+  rates. A margin of 0 means unset: ask. If the solicitation caps profit or fixes
+  pricing, flag it rather than silently overriding the margin.
 - Match the solicitation's required price format exactly (CLIN structure, units).
 - Quote validity = `quote_valid_days` unless the solicitation says otherwise.
 - Show the arithmetic: extended totals must recompute from unit price x quantity.

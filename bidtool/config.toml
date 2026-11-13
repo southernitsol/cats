@@ -70,12 +70,17 @@ contact_phone = "228-324-7787"
 website = "www.fields-technology.com"
 
 [pricing]
-default_margin_pct = 0      # 0 = unset: the skill must ask before pricing
+default_margin_pct = 15     # 0 = unset: the skill must ask before pricing
+# Margin is taken on the sell price: price = cost / (1 - margin).
+# Applies to hardware/software resale only. Labor rates below are billing rates
+# and already include profit, so no extra margin is added to labor.
+margin_method = "margin_on_price"   # TODO-OWNER: confirm (alternative: markup on cost)
 quote_valid_days = 30
-# Fully burdened hourly rates. 0 = unset: the skill must not invent a rate.
+# What counts as normal business hours for the standard labor rate. The skill asks
+# if a solicitation needs after-hours work and this is blank. Weekends and federal
+# holidays always use the after-hours rate.
+business_hours = ""   # TODO-OWNER, e.g. "Mon-Fri 08:00-17:00 Central"
+# Hourly billing rates in USD. 0 = unset: the skill must not invent a rate.
 [pricing.labor_rates]
-"Solutions Architect" = 0
-"Systems Engineer" = 0
-"Cybersecurity Analyst" = 0
-"Help Desk / Technician" = 0
-"Project Manager" = 0
+"Standard (normal business hours)" = 150
+"After-hours / weekend / holiday" = 195
